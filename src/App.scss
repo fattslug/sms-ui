@@ -1,0 +1,25 @@
+header {
+  min-height: 10vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+}
+
+section {
+  min-height: 80vh;
+}
+
+footer {
+  background-color: darkgrey;
+  min-height: 10vh;
+}
+
+.date-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
