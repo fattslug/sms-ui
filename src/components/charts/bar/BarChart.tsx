@@ -4,12 +4,15 @@ import { XAxis, XGrid, YAxis, YGrid } from '../Shared'
 import { DataProps, PlotData, BarChartProps } from '../types';
 import  * as infobox from './InfoBox';
 import './BarChart.scss';
+import { Link } from 'react-router-dom';
 
 /**
  * Generates the data bars
  */
 export const Bars: React.FC<BarChartProps> = (props) => {
   const bars = ((props.plotData as PlotData[]).map((d: PlotData) => {
+    const actionString = generateActionString(d.data.date, props.chartType);
+
     const barSize = {
       height: props.plotHeight - d.y,
       width: props.xScale.bandwidth() / 2.5
@@ -19,25 +22,48 @@ export const Bars: React.FC<BarChartProps> = (props) => {
     }
 
     d.x = props.property === 'received' ? (d.x + props.xScale.bandwidth()/2.5) : d.x;
-    return (<rect
-      key={d.x}
-      x={d.x}
-      y={d.y}
-      height={barSize.height}
-      width={barSize.width}
-      fill={props.color}
-      onMouseOver={() => {
-        infobox.add(d, props, barSize);
-      }}
-      onMouseOut={() => {
-        infobox.remove(d);
-      }}
-    />);
+    return (
+      <Link to={actionString} key={d.x}>
+        <rect
+          x={d.x}
+          y={d.y}
+          height={barSize.height}
+          width={barSize.width}
+          fill={props.color}
+          onMouseOver={() => {
+            infobox.add(d, props, barSize);
+          }}
+          onMouseOut={() => {
+            infobox.remove(d);
+          }}
+          onClick={() => {
+            infobox.remove(d);
+          }}
+        />
+      </Link>
+    );
   }));
 
   return <g>{bars}</g>;
 };
 
+function generateActionString(date: Date, chartType: string): string {
+  const link = {
+    year: date.getFullYear(),
+    month: date.getMonth(),
+    day: date.getDate()
+  };
+  let queryString = '';
+  if (chartType === 'dod') {
+    queryString = `/day?y=${link.year}&m=${link.month}&d=${link.day}`;
+  } else if (chartType === 'mom') {
+    queryString = `/month?y=${link.year}&m=${link.month}`;
+  } else if (chartType === 'yoy') {
+    queryString = `/year?y=${link.year}`;
+  }
+
+  return queryString;
+}
 
 /**
  * Renders the full chart
@@ -62,7 +88,9 @@ export const BarChart: React.FC<DataProps> = (props) => {
     yScale: y,
     plotWidth: chartWidth,
     plotHeight: chartHeight,
-    data: data
+    data: data,
+    chartType: props.chartType,
+    timeFormat: props.timeFormat
   };
 
   const plotDataSent = {

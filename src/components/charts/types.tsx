@@ -1,3 +1,9 @@
+import { RouteComponentProps } from "react-router-dom";
+
+export type FormProps = RouteComponentProps & {
+  setData: any
+}
+
 export type DataType = {
   date: Date,
   sent: number,
@@ -10,7 +16,9 @@ export type DataProps = {
   minY: number,
   maxX: Date,
   maxY: number,
-  length: number
+  length: number,
+  chartType: string,
+  timeFormat: string
 }
 
 export type PlotData = {
@@ -39,5 +47,7 @@ export type BarChartProps = {
   yScale: d3.ScaleLinear<number, number>
   plotWidth: number,
   plotHeight: number,
-  plotData?: PlotData[]
+  plotData?: PlotData[],
+  chartType: string,
+  timeFormat: string
 }

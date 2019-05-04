@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { getData } from '../../App';
+import { FormProps } from '../charts/types';
 import './YearForm.scss';
-
-type IProps = {
-  updateData: any
-}
+import { withRouter } from 'react-router-dom';
+import * as queryString from 'query-string';
 
 type YearFormType = {
   [key: string]: number,
   year: number
 }
 
-export const YearForm: React.FC<IProps> = (props) => {
+const YearForm: React.FC<FormProps> = (props) => {
+  const yearParam = parseInt(queryString.parse(props.location.search)['y'] as string) || 2019;
+  const setData = props.setData;
+  const callback = useCallback(
+    async () => {
+      const data = await getData({ year: yearParam });
+      setData(data);
+    },
+    [setData, yearParam],
+  );
+
+  useEffect(() => {
+    callback();
+  }, [callback]);
 
   const [ formValues, setFormValues ] = useState<YearFormType>({
-    year: 2019
+    year: yearParam
   });
 
-  function setValue(name: string, value: number) {
+  async function setValue(name: string, value: number) {
     formValues[name] = value;
-    props.updateData(formValues.year);
+
+    const data = getData(formValues);
+    setData(data);
 
     setFormValues({
       year: formValues.year
@@ -27,7 +42,7 @@ export const YearForm: React.FC<IProps> = (props) => {
 
   return (
       <form className="date-form">
-        <h2>Pick a Month and Year</h2>
+        <h2>Pick a Year</h2>
         <div>
           <select name="year"
             onChange={e => setValue('year', parseInt(e.target.value))}
@@ -44,3 +59,5 @@ export const YearForm: React.FC<IProps> = (props) => {
       </form>
   );
 }
+
+export default withRouter(YearForm);

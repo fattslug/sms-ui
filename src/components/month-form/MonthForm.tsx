@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { getData } from '../../App';
+import { FormProps } from '../charts/types';
+import { withRouter } from "react-router-dom";
+import * as queryString from 'query-string';
 import './MonthForm.scss';
-
-type IProps = {
-  updateData: any
-}
 
 type MonthFormType = {
   [key: string]: number,
@@ -11,16 +11,33 @@ type MonthFormType = {
   year: number
 }
 
-export const MonthForm: React.FC<IProps> = (props) => {
+const MonthForm: React.FC<FormProps> = (props) => {
+  const thisMonth = new Date().getMonth()+1;
+  const yearParam = parseInt(queryString.parse(props.location.search)['y'] as string) || 2019;
+  const monthParam = parseInt(queryString.parse(props.location.search)['m'] as string) || thisMonth;
+  const setData = props.setData;
+  const callback = useCallback(
+    async () => {
+      const data = await getData({ year: yearParam, month: monthParam });
+      setData(data);
+    },
+    [setData, yearParam, monthParam],
+  );
+
+  useEffect(() => {
+    callback();
+  }, [callback]);
 
   const [ formValues, setFormValues ] = useState<MonthFormType>({
-    month: 1,
-    year: 2019
+    month: monthParam,
+    year: yearParam
   });
 
-  function setValue(name: string, value: number) {
+  async function setValue(name: string, value: number) {
     formValues[name] = value;
-    props.updateData(formValues.month, formValues.year);
+
+    const data = await getData(formValues);
+    setData(data);
 
     setFormValues({
       month: formValues.month,
@@ -64,3 +81,5 @@ export const MonthForm: React.FC<IProps> = (props) => {
       </form>
   );
 }
+
+export default withRouter(MonthForm);
