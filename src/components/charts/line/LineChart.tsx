@@ -71,8 +71,8 @@ export const LineChart: React.FC<DataProps> = (props) => {
       return {
         id: i,
         data: d,
-        x: x(d.date),
-        y: y(d.sent)
+        x: x(d.date as Date),
+        y: y(d.values[0].value)
       };
     })
   };
@@ -82,8 +82,8 @@ export const LineChart: React.FC<DataProps> = (props) => {
       return {
         id: i,
         data: d,
-        x: x(d.date),
-        y: y(d.received)
+        x: x(d.date as Date),
+        y: y(d.values[1].value)
       };
     })
   };

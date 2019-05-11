@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
-import { getData } from '../../App';
+import { getData } from '../../../App';
 import './DecadeForm.scss';
-import { FormProps } from '../charts/types';
+import { FormProps } from '../../charts/types';
 import { withRouter } from 'react-router';
 
 const DecadeForm: React.FC<FormProps> = (props) => {

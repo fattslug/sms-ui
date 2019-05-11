@@ -8,22 +8,21 @@ import { BarChartProps, PlotData } from '../types';
  * @param boxSize Width + Height of info box
  */
 export const calculatePosition = (
-  dataPoint: { x: number, y: number },
-  chartSize: { height: number, width: number },
-  boxSize: { height: number, width: number },
-  barSize: { height: number, width: number }
+  props: BarChartProps,
+  dataPoint: PlotData,
+  boxSize: { height: number, width: number }
 ) => {
   const margin = { top: 20, right: 40, bottom: 50, left: 40 };
-  let newX = (dataPoint.x + margin.left) - boxSize.width;
-  let newY = dataPoint.y + margin.top;
+  let newX = ((dataPoint.x + margin.left) + ((props.xGroup.paddingOuter() * props.xScale.bandwidth()) / 2)) - boxSize.width;
+  let newY = dataPoint.y(dataPoint.data.values[0].value) + margin.top;
   // Handle bottom overhang
-  if (newY + boxSize.height > chartSize.height) {
-    const overhang = newY + boxSize.height - (chartSize.height + margin.bottom + margin.top);
+  if (newY + boxSize.height > props.plotHeight) {
+    const overhang = newY + boxSize.height - (props.plotHeight + margin.bottom + margin.top);
     newY -= overhang + 50;
   }
   // Handle left overhang
   if (newX - boxSize.width < 0) {
-    newX += boxSize.width + barSize.width;
+    newX += boxSize.width + (props.xScale.bandwidth()) - ((props.xGroup.paddingOuter() * props.xScale.bandwidth()));
   }
 
   return {
@@ -37,7 +36,7 @@ export const calculatePosition = (
  * @param dataPoint Data relevant to infobox content
  */
 export const remove = (dataPoint: PlotData) => {
-  const id = `x${dataPoint.x.toFixed(0)}y${dataPoint.y}`;
+  const id = `x${dataPoint.x.toFixed(0)}y${dataPoint.y(dataPoint.data.values[0].value)}`;
   d3.select(`#${id}`).remove();
   const circles = d3.selectAll('circle').filter((e, index, t) => {
     const el: SVGCircleElement = t[index] as SVGCircleElement;
@@ -54,21 +53,13 @@ export const remove = (dataPoint: PlotData) => {
  * @param dataPoint Data relevant to infobox content
  * @param props Props relevant to chart (we use chart width/height)
  */
-export const add = (dataPoint: PlotData, props: BarChartProps, barSize: { height: number, width: number }) => {
+export const add = (dataPoint: PlotData, props: BarChartProps) => {
   const boxSize = {
     height: 150,
     width: 100
   };
-  const chartSize = {
-    height: props.plotHeight,
-    width: props.plotWidth
-  }
-  const point = {
-    x: dataPoint.x,
-    y: dataPoint.y
-  };
 
-  const infoboxCoords = calculatePosition(point, chartSize, boxSize, barSize);
+  const infoboxCoords = calculatePosition(props, dataPoint, boxSize);
 
   const circles = d3.selectAll('circle').filter((e, index, t) => {
     const el: SVGCircleElement = t[index] as SVGCircleElement;
@@ -79,7 +70,7 @@ export const add = (dataPoint: PlotData, props: BarChartProps, barSize: { height
     circle.setAttribute('r', '10');
   });
 
-  const id = `x${dataPoint.x.toFixed(0)}y${dataPoint.y}`;
+  const id = `x${dataPoint.x.toFixed(0)}y${dataPoint.y(dataPoint.data.values[0].value)}`;
 
   d3.select('#infobox')
     .append('g')
@@ -96,9 +87,21 @@ export const add = (dataPoint: PlotData, props: BarChartProps, barSize: { height
 
   let y = infoboxCoords.y + 20;
   let x = infoboxCoords.x + 10;
-  y = addTextGroup(id, x, y, 'Date:', d3.timeFormat('%b-%d-%Y')(dataPoint.data.date));
-  y = addTextGroup(id, x, y, 'Sent:', dataPoint.data.sent, d3.schemeCategory10[0]);
-  addTextGroup(id, x, y, 'Received:', dataPoint.data.received, d3.schemeCategory10[1]);
+
+  let label: string;
+  let labelVal: string;
+  if (props.chartType !== 'contacts') {
+    label = 'Date:';
+    labelVal = d3.timeFormat('%b-%d-%Y')(dataPoint.data.date as Date);
+  } else {
+    label = 'Contact:';
+    labelVal = dataPoint.data.contact as string === '' ? 'Unknown' : dataPoint.data.contact as string;
+  }
+
+  y = addTextGroup(id, x, y, label, labelVal);
+  dataPoint.data.values.forEach((val, index) => {
+    y = addTextGroup(id, x, y, `${val.label}:`, val.value, d3.schemeCategory10[index]);
+  });
 
 }
 

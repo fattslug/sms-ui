@@ -11,27 +11,13 @@ import { Link } from 'react-router-dom';
  */
 export const Bars: React.FC<BarChartProps> = (props) => {
   const bars = ((props.plotData as PlotData[]).map((d: PlotData) => {
-    const actionString = generateActionString(d.data.date, props.chartType);
-
-    const barSize = {
-      height: props.plotHeight - d.y,
-      width: props.xScale.bandwidth() / 2.5
-    }
-    if (barSize.height < 0) {
-      barSize.height = 0;
-    }
-
-    d.x = props.property === 'received' ? (d.x + props.xScale.bandwidth()/2.5) : d.x;
+    const actionString = props.chartType !== 'contacts' ? generateActionString(d.data.date as Date, props.chartType) : '';
+    const colors = d3.schemeCategory10;
     return (
       <Link to={actionString} key={d.x}>
-        <rect
-          x={d.x}
-          y={d.y}
-          height={barSize.height}
-          width={barSize.width}
-          fill={props.color}
+        <g transform={`translate(${d.x}, 0)`}
           onMouseOver={() => {
-            infobox.add(d, props, barSize);
+            infobox.add(d, props);
           }}
           onMouseOut={() => {
             infobox.remove(d);
@@ -39,7 +25,18 @@ export const Bars: React.FC<BarChartProps> = (props) => {
           onClick={() => {
             infobox.remove(d);
           }}
-        />
+        >
+        {d.data.values.map((val, index) => {
+          return <rect
+            key={index}
+            x={d.gx(val.label)}
+            y={d.y(val.value)}
+            height={props.plotHeight - d.y(val.value) < 0 ? 0 : props.plotHeight - d.y(val.value)}
+            width={props.xGroup.bandwidth()}
+            fill={colors[index]}
+          />
+        })}          
+        </g>
       </Link>
     );
   }));
@@ -55,9 +52,9 @@ function generateActionString(date: Date, chartType: string): string {
   };
   let queryString = '';
   if (chartType === 'dod') {
-    queryString = `/day?y=${link.year}&m=${link.month}&d=${link.day}`;
+    queryString = `/day?y=${link.year}&m=${link.month+1}&d=${link.day}`;
   } else if (chartType === 'mom') {
-    queryString = `/month?y=${link.year}&m=${link.month}`;
+    queryString = `/month?y=${link.year}&m=${link.month+1}`;
   } else if (chartType === 'yoy') {
     queryString = `/year?y=${link.year}`;
   }
@@ -73,18 +70,36 @@ export const BarChart: React.FC<DataProps> = (props) => {
   const data = props;
   const margin = { top: 20, right: 40, bottom: 50, left: 40 };
   const chartWidth: number = (window.innerWidth/1.07) - margin.left - margin.right;
-  const chartHeight: number = (window.innerHeight/1.3) - margin.top - margin.bottom;;
+  const chartHeight: number = (window.innerHeight/1.3) - margin.top - margin.bottom;
 
-  const x = d3.scaleBand()
-    .domain(data.sms.map((d) => d.date.toString()))
-    .rangeRound([0, chartWidth]);
+  let dataDomain: string[] = [];
+  if (data.sms.length > 0) {
+    dataDomain = data.sms.map((sms) => {
+      return sms.values.map((d) => d.label);
+    })[0];
+  }
+
+
+  let xChart: d3.ScaleBand<string>;
+  xChart = d3.scaleBand().rangeRound([0, chartWidth]);
+  if (props.chartType !== 'contacts') {
+    xChart.domain(data.sms.map((d) => (d.date as Date).toString()))
+  } else {
+    xChart.domain(data.sms.map((d) => d.contact as string))
+  }
+
+  const xGroup = d3.scaleBand()
+    .domain(dataDomain)
+    .rangeRound([0, xChart.bandwidth()])
+    .paddingOuter(.1);
 
   const y = d3.scaleLinear()
     .domain([data.minY, data.maxY])
     .rangeRound([chartHeight, 0]).nice();
 
   const metadata = {
-    xScale: x,
+    xScale: xChart,
+    xGroup: xGroup,
     yScale: y,
     plotWidth: chartWidth,
     plotHeight: chartHeight,
@@ -93,29 +108,19 @@ export const BarChart: React.FC<DataProps> = (props) => {
     timeFormat: props.timeFormat
   };
 
-  const plotDataSent = {
+  const plotData = {
     plotData: data.sms.map((d, i) => {
       return {
         id: i,
         data: d,
-        x: x(d.date.toString()) as number,
-        y: y(d.sent)
+        x: xChart(
+          props.chartType !== 'contacts' ? (d.date as Date).toString() : (d.contact as string)
+        ) as number,
+        gx: xGroup,
+        y: y
       };
     })
   };
-
-  const plotDataReceived = {
-    plotData: data.sms.map((d, i) => {
-      return {
-        id: i,
-        data: d,
-        x: x(d.date.toString()) as number,
-        y: y(d.received)
-      };
-    })
-  };
-
-  const colors = d3.schemeCategory10;
 
   return(
     <div className="chart">
@@ -135,8 +140,7 @@ export const BarChart: React.FC<DataProps> = (props) => {
           height={chartHeight}
           transform={`translate(${margin.left}, ${margin.top})`}
         >
-          <Bars {...metadata} {...plotDataSent} color={colors[0]} property='sent' />
-          <Bars {...metadata} {...plotDataReceived} color={colors[1]} property='received' />
+          <Bars {...metadata} {...plotData} property='sent' />
         </g>
         <g id="infobox"></g>
       </svg>

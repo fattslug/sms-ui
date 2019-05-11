@@ -4,10 +4,15 @@ export type FormProps = RouteComponentProps & {
   setData: any
 }
 
+export type Value = {
+  label: string,
+  value: number
+}
+
 export type DataType = {
-  date: Date,
-  sent: number,
-  received: number
+  date?: Date,
+  contact?: string,
+  values: Value[]
 }
 
 export type DataProps = {
@@ -25,7 +30,8 @@ export type PlotData = {
   id: number,
   data: DataType,
   x: number,
-  y: number
+  gx?: any,
+  y: any
 }
 
 export type LineChartProps = {
@@ -44,6 +50,7 @@ export type BarChartProps = {
   color?: string,
   property?: string,
   xScale: d3.ScaleBand<string>,
+  xGroup: d3.ScaleBand<string>,
   yScale: d3.ScaleLinear<number, number>
   plotWidth: number,
   plotHeight: number,

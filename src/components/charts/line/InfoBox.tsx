@@ -92,9 +92,10 @@ export const add = (dataPoint: PlotData, props: LineChartProps) => {
 
   let y = infoboxCoords.y + 20;
   let x = infoboxCoords.x + 10;
-  y = addTextGroup(`#x${dataPoint.x}y${dataPoint.y}`, x, y, 'Date:', d3.timeFormat('%b-%d-%Y')(dataPoint.data.date));
-  y = addTextGroup(`#x${dataPoint.x}y${dataPoint.y}`, x, y, 'Sent:', dataPoint.data.sent, d3.schemeCategory10[0]);
-  addTextGroup(`#x${dataPoint.x}y${dataPoint.y}`, x, y, 'Received:', dataPoint.data.received, d3.schemeCategory10[1]);
+  y = addTextGroup(`#x${dataPoint.x}y${dataPoint.y}`, x, y, 'Date:', d3.timeFormat('%b-%d-%Y')(dataPoint.data.date as Date));
+  dataPoint.data.values.forEach((val, index) => {
+    y = addTextGroup(`#x${dataPoint.x}y${dataPoint.y}`, x, y, `${val.label}:`, val.value, d3.schemeCategory10[index]);
+  });
 
 }
 

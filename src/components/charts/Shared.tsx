@@ -21,7 +21,10 @@ export function D3blackbox(d3render: any) {
 export const XAxis = D3blackbox(function(this: any) {
   const axis = d3.axisBottom(this.props.xScale)
     .ticks(this.props.data.length)
-    .tickFormat((d: any) => d3.timeFormat(this.props.timeFormat)(new Date(d)))
+  
+    if (this.props.chartType !== 'contacts') {
+      axis.tickFormat((d: any) => d3.timeFormat(this.props.timeFormat)(new Date(d)));
+    }
 
   d3.select(this.refs.anchor)
     .classed('xAxis', true)

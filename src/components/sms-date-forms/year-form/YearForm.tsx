@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getData } from '../../App';
-import { FormProps } from '../charts/types';
+import { getData } from '../../../App';
+import { FormProps } from '../../charts/types';
 import './YearForm.scss';
 import { withRouter } from 'react-router-dom';
 import * as queryString from 'query-string';
@@ -31,8 +31,8 @@ const YearForm: React.FC<FormProps> = (props) => {
 
   async function setValue(name: string, value: number) {
     formValues[name] = value;
-
-    const data = getData(formValues);
+    
+    const data = await getData(formValues);
     setData(data);
 
     setFormValues({

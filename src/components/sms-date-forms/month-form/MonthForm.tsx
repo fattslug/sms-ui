@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getData } from '../../App';
-import { FormProps } from '../charts/types';
+import { getData } from '../../../App';
+import { FormProps } from '../../charts/types';
 import { withRouter } from "react-router-dom";
 import * as queryString from 'query-string';
 import './MonthForm.scss';
