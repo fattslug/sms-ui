@@ -5,13 +5,7 @@ import { withRouter } from "react-router-dom";
 import * as queryString from 'query-string';
 import './ContactsForm.scss';
 
-type MonthFormType = {
-  [key: string]: number,
-  month: number,
-  year: number
-}
-
-const MonthForm: React.FC<FormProps> = (props) => {
+const ContactsForm: React.FC<FormProps> = (props) => {
   const thisMonth = new Date().getMonth()+1;
   const today = new Date().getDate();
   const yearParam = parseInt(queryString.parse(props.location.search)['y'] as string) || 2019;
@@ -38,4 +32,4 @@ const MonthForm: React.FC<FormProps> = (props) => {
   );
 }
 
-export default withRouter(MonthForm);
+export default withRouter(ContactsForm);

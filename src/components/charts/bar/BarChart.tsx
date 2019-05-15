@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as d3 from 'd3';
 import { XAxis, XGrid, YAxis, YGrid } from '../Shared'
 import { DataProps, PlotData, BarChartProps } from '../types';
@@ -14,7 +14,7 @@ export const Bars: React.FC<BarChartProps> = (props) => {
     const actionString = props.chartType !== 'contacts' ? generateActionString(d.data.date as Date, props.chartType) : '';
     const colors = d3.schemeCategory10;
     return (
-      <Link to={actionString} key={d.x}>
+      <Link to={actionString} key={d.x*Math.random()}>
         <g transform={`translate(${d.x}, 0)`}
           onMouseOver={() => {
             infobox.add(d, props);
@@ -28,14 +28,14 @@ export const Bars: React.FC<BarChartProps> = (props) => {
         >
         {d.data.values.map((val, index) => {
           return <rect
-            key={index}
+            key={index*val.value}
             x={d.gx(val.label)}
             y={d.y(val.value)}
             height={props.plotHeight - d.y(val.value) < 0 ? 0 : props.plotHeight - d.y(val.value)}
             width={props.xGroup.bandwidth()}
             fill={colors[index]}
           />
-        })}          
+        })}  
         </g>
       </Link>
     );
@@ -62,6 +62,23 @@ function generateActionString(date: Date, chartType: string): string {
   return queryString;
 }
 
+function calculateChartWidth(chartType: string): number {
+  const margin = { top: 20, right: 40, bottom: 50, left: 40 };
+  const defaultWidth = window.innerWidth/1.07 - margin.left - margin.right;
+  switch (chartType) {
+    case 'yoy':
+      return window.innerWidth <= 400 ? 400 : defaultWidth;
+    case 'mom':
+      return window.innerWidth <= 600 ? 600 : defaultWidth;
+    case 'dod':
+      return window.innerWidth <= 1400 ? 1400 : defaultWidth;
+    case 'contacts':
+      return window.innerWidth <= 400 ? 400 : defaultWidth;
+    default:
+      return defaultWidth;
+  }
+}
+
 /**
  * Renders the full chart
  * @param props Props relevant to chart data
@@ -69,7 +86,11 @@ function generateActionString(date: Date, chartType: string): string {
 export const BarChart: React.FC<DataProps> = (props) => {
   const data = props;
   const margin = { top: 20, right: 40, bottom: 50, left: 40 };
-  const chartWidth: number = (window.innerWidth/1.07) - margin.left - margin.right;
+
+  const [ chartWidth, setChartWidth ] = useState<number>(calculateChartWidth(props.chartType));
+  window.addEventListener('resize', () => {
+    setChartWidth(calculateChartWidth(props.chartType));
+  });
   const chartHeight: number = (window.innerHeight/1.3) - margin.top - margin.bottom;
 
   let dataDomain: string[] = [];
@@ -121,6 +142,8 @@ export const BarChart: React.FC<DataProps> = (props) => {
       };
     })
   };
+
+  infobox.removeAll();
 
   return(
     <div className="chart">

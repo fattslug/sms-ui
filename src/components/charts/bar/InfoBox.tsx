@@ -46,6 +46,13 @@ export const remove = (dataPoint: PlotData) => {
     const circle = group[index] as SVGCircleElement;
     circle.setAttribute('r', '5');
   });
+}
+
+/**
+ * Removes all infoboxes
+ */
+export const removeAll = () => {
+  d3.selectAll(`.infobox`).remove();
 } 
 
 /**
@@ -75,6 +82,7 @@ export const add = (dataPoint: PlotData, props: BarChartProps) => {
   d3.select('#infobox')
     .append('g')
     .attr('id', id)
+    .attr('class', 'infobox')
     .append('rect')
     .attr('x', infoboxCoords.x)
     .attr('rx', 0)
@@ -95,7 +103,7 @@ export const add = (dataPoint: PlotData, props: BarChartProps) => {
     labelVal = d3.timeFormat('%b-%d-%Y')(dataPoint.data.date as Date);
   } else {
     label = 'Contact:';
-    labelVal = dataPoint.data.contact as string === '' ? 'Unknown' : dataPoint.data.contact as string;
+    labelVal = dataPoint.data.contact as string === '' ? '' : dataPoint.data.contact as string;
   }
 
   y = addTextGroup(id, x, y, label, labelVal);

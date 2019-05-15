@@ -26,10 +26,10 @@ export const getData = ({
     chartOpts = { type: 'contacts', timeFormat: '' };
   } else if (month > 0) {
     queryString = `month/${month}?year=${year}`;
-    chartOpts = { type: 'dod', timeFormat: '%b-%d' };
+    chartOpts = { type: 'dod', timeFormat: '%d' };
   } else if (year > 0) {
     queryString = `year/${year}`
-    chartOpts = { type: 'mom', timeFormat: '%b-%Y' };
+    chartOpts = { type: 'mom', timeFormat: '%b' };
   } else {
     queryString = `decade`;
     chartOpts = { type: 'yoy', timeFormat: '%Y'};
@@ -37,7 +37,7 @@ export const getData = ({
 
   return axios.get<DataProps>(`http://localhost:8080/sms/${queryString}`).then((res) => {
     let sms = res.data.sms;
-    if (Object.keys(sms[0]).includes('date')) {
+    if (sms.length > 0 && Object.keys(sms[0]).includes('date')) {
       sms.map((d) => d.date = new Date(d.date as Date));
     }
     return {
@@ -84,9 +84,3 @@ const App: React.FC = () => {
 }
 
 export default App;
-
-
-// /sms/date/month
-// /sms/date/year
-// /sms/date/decade
-// /sms/contacts/day
