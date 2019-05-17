@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { getData } from '../../../App';
+import { getContacts } from '../../../services/chart.service';
 import { FormProps } from '../../charts/types';
 import { withRouter } from "react-router-dom";
 import * as queryString from 'query-string';
@@ -15,7 +15,7 @@ const ContactsForm: React.FC<FormProps> = (props) => {
   const setData = props.setData;
   const callback = useCallback(
     async () => {
-      const data = await getData({ year: yearParam, month: monthParam, day: dayParam });
+      const data = await getContacts({ year: yearParam, month: monthParam, day: dayParam });
       setData(data);
     },
     [setData, yearParam, monthParam, dayParam],

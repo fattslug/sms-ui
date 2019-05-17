@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { getData } from '../../../App';
+import { getDecade } from '../../../services/chart.service';
 import './DecadeForm.scss';
 import { FormProps } from '../../charts/types';
 import { withRouter } from 'react-router';
@@ -8,7 +8,7 @@ const DecadeForm: React.FC<FormProps> = (props) => {
   const setData = props.setData;
   const callback = useCallback(
     async () => {
-      const data = await getData();
+      const data = await getDecade();
       setData(data);
     },
     [setData],
@@ -23,7 +23,7 @@ const DecadeForm: React.FC<FormProps> = (props) => {
       <div>
         <button type="button"
           onClick={async () => {
-            const data = await getData();
+            const data = await getDecade();
             props.setData(data);
           }}
         >

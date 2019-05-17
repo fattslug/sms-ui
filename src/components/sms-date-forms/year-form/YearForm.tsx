@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getData } from '../../../App';
+import { getYear } from '../../../services/chart.service';
 import { FormProps } from '../../charts/types';
 import './YearForm.scss';
 import { withRouter } from 'react-router-dom';
@@ -15,7 +15,7 @@ const YearForm: React.FC<FormProps> = (props) => {
   const setData = props.setData;
   const callback = useCallback(
     async () => {
-      const data = await getData({ year: yearParam });
+      const data = await getYear({ year: yearParam });
       setData(data);
     },
     [setData, yearParam],
@@ -32,7 +32,7 @@ const YearForm: React.FC<FormProps> = (props) => {
   async function setValue(name: string, value: number) {
     formValues[name] = value;
     
-    const data = await getData(formValues);
+    const data = await getYear(formValues);
     setData(data);
 
     setFormValues({
