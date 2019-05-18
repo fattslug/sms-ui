@@ -28,7 +28,7 @@ export const Bars: React.FC<BarChartProps> = (props) => {
         >
         {d.data.values.map((val, index) => {
           return <rect
-            key={index*val.value}
+            key={d.x + d.gx(val.label)}
             x={d.gx(val.label)}
             y={d.y(val.value)}
             height={props.plotHeight - d.y(val.value) < 0 ? 0 : props.plotHeight - d.y(val.value)}
@@ -163,7 +163,7 @@ export const BarChart: React.FC<DataProps> = (props) => {
           height={chartHeight}
           transform={`translate(${margin.left}, ${margin.top})`}
         >
-          <Bars {...metadata} {...plotData} property='sent' />
+          <Bars {...metadata} {...plotData} />
         </g>
         <g id="infobox"></g>
       </svg>

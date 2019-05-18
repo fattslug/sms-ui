@@ -12,6 +12,7 @@ export type Value = {
 export type DataType = {
   date?: Date,
   contact?: string,
+  phone?: string,
   values: Value[]
 }
 

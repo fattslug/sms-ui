@@ -6,7 +6,7 @@ export const getContacts = ({
   month = 0,
   day = 0
 } = {}): Promise<DataProps> => {
-  const queryString = `contacts?month=${month}&day=${day}&year=${year}`;
+  const queryString = `contacts/count?month=${month}&day=${day}&year=${year}`;
   const chartOpts = { type: 'contacts', timeFormat: '' };
   return getData(queryString, chartOpts);
 }
@@ -39,6 +39,9 @@ const getData = (queryString: string, chartOpts: {type: string, timeFormat: stri
     let sms = res.data.sms;
     if (sms.length > 0 && Object.keys(sms[0]).includes('date')) {
       sms.map((d) => d.date = new Date(d.date as Date));
+    }
+    if (sms.length > 0 && Object.keys(sms[0]).includes('contact')) {
+      sms.map((d) => d.contact = d.contact === '' ? d.phone : d.contact);
     }
     return {
       sms: sms,
