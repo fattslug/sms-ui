@@ -85,7 +85,7 @@ function calculateChartWidth(chartType: string): number {
  */
 export const BarChart: React.FC<DataProps> = (props) => {
   const data = props;
-  const margin = { top: 20, right: 40, bottom: 50, left: 40 };
+  const margin = { top: 20, right: 40, bottom: 50, left: 55 };
 
   const [ chartWidth, setChartWidth ] = useState<number>(calculateChartWidth(props.chartType));
   window.addEventListener('resize', () => {
